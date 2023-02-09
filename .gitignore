@@ -1,4 +1,5 @@
 dist
+.env
 
 # Yarn files
 .yarn/install-state.gz
