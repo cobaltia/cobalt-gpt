@@ -16,7 +16,8 @@
 		"#utils/*": "./dist/lib/utils/*.js",
 		"#utils/common": "./dist/lib/utils/common/index.js",
 		"#utils/functions": "./dist/lib/utils/functions/index.js",
-		"#utils/resolvers": "./dist/lib/utils/resolvers/index.js"
+		"#utils/resolvers": "./dist/lib/utils/resolvers/index.js",
+		"#root/interactions": "./dist/interactions/index.js"
 	},
 	"scripts": {
 		"test": "vitest run",
@@ -42,6 +43,7 @@
 		"@sapphire/utilities": "^3.11.0",
 		"@skyra/env-utilities": "^1.1.0",
 		"chatgpt": "^4.2.0",
+		"discord-api-types": "^0.37.32",
 		"discord.js": "^14.7.1",
 		"globby": "^13.1.3"
 	},

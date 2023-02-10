@@ -2,7 +2,14 @@ import { URL } from 'node:url';
 import { envParseString, setup } from '@skyra/env-utilities';
 import { type ClientOptions, GatewayIntentBits, Options, Partials } from 'discord.js';
 
-setup(new URL('.env', import.meta.url));
+setup(new URL('../.env', import.meta.url));
+
+export function parseClient() {
+	return {
+		id: envParseString('CLIENT_ID'),
+		secret: envParseString('CLIENT_SECRET'),
+	};
+}
 
 export function parseGptToken() {
 	return {
@@ -20,6 +27,8 @@ export const CLIENT_OPTIONS: ClientOptions = {
 
 declare module '@skyra/env-utilities' {
 	interface Env {
+		CLIENT_ID?: string;
+		CLIENT_SECRET?: string;
 		GPT_TOKEN?: string;
 	}
 }

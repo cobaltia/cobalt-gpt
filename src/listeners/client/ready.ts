@@ -5,6 +5,7 @@ abstract class ReadyListener extends Listener<typeof Events.ClientReady> {
 	public constructor() {
 		super({
 			name: Events.ClientReady,
+			once: true,
 		});
 	}
 
