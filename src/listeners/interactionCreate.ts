@@ -16,7 +16,7 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 		console.log(`${interaction.member.user.tag} triggered ${this.name}`);
 		if (!interaction.isChatInputCommand()) return;
 		const formatter = new DurationFormatter();
-		const rateLimitManager = new RateLimitManager(Time.Day, 50);
+		const rateLimitManager = new RateLimitManager(Time.Hour, 50);
 		const ratelimit = rateLimitManager.acquire('global');
 		if (interaction.commandName === 'ask') {
 			if (ratelimit.limited) {
