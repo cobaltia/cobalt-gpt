@@ -11,6 +11,12 @@ export function parseClient() {
 	};
 }
 
+export function parseWebhooks() {
+	return {
+		prompt: envParseString('PROMPT_WEBHOOK_URL'),
+	};
+}
+
 export function parseGptToken() {
 	return {
 		token: envParseString('GPT_TOKEN'),
@@ -29,6 +35,7 @@ declare module '@skyra/env-utilities' {
 	interface Env {
 		CLIENT_ID?: string;
 		CLIENT_SECRET?: string;
+		PROMPT_WEBHOOK_URL?: string;
 		GPT_TOKEN?: string;
 	}
 }

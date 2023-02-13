@@ -1,9 +1,13 @@
 import { DurationFormatter, Time } from '@sapphire/duration';
 import { RateLimitManager } from '@sapphire/ratelimits';
-import type { Interaction } from 'discord.js';
+import { EmbedBuilder, type Interaction, WebhookClient } from 'discord.js';
 import { Events } from '../lib/types/Events.js';
 import { api } from '#lib/gpt';
 import { Listener } from '#lib/structures';
+import { parseWebhooks } from '#root/config';
+import { truncate } from '#utils/utils';
+
+const webhooks = parseWebhooks();
 
 abstract class InteractionCreateListener extends Listener<typeof Events.InteractionCreate> {
 	public constructor() {
@@ -30,14 +34,26 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 			try {
 				await interaction.deferReply();
 				const prompt = interaction.options.getString('prompt', true);
-				const res = await api.sendMessage(prompt);
-				await interaction.editReply(res.text);
+				await this.logPrompt(prompt, interaction).catch(console.error);
+				const res = await api.sendMessage(prompt, { promptPrefix: ' ', promptSuffix: ' ' });
+				await interaction.editReply(truncate(res.text, 2_000));
 				ratelimit.consume();
 			} catch (error) {
 				await interaction.editReply('An error occurred while processing your request.');
 				console.error(error);
 			}
 		}
+	}
+
+	private async logPrompt(prompt: string, interaction: Interaction<'cached'>) {
+		const webhook = new WebhookClient({ url: webhooks.prompt });
+		const embed = new EmbedBuilder()
+			.setTitle('Prompt')
+			.setAuthor({ name: interaction.member.user.tag, iconURL: interaction.member.user.displayAvatarURL() })
+			.setDescription(prompt)
+			.setFooter({ text: interaction.guildId, iconURL: interaction.guild.iconURL() ?? undefined })
+			.setTimestamp();
+		await webhook.send({ embeds: [embed] });
 	}
 }
 
