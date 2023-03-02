@@ -2,7 +2,7 @@ import { Configuration, OpenAIApi } from 'openai';
 import { parseGptToken } from '#root/config';
 
 const config = new Configuration({
-	apiKey: parseGptToken().token,
+	apiKey: parseGptToken(),
 });
 
 const openai = new OpenAIApi(config);
