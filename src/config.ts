@@ -18,9 +18,11 @@ export function parseWebhooks() {
 }
 
 export function parseGptToken() {
-	return {
-		token: envParseString('GPT_TOKEN'),
-	};
+	return envParseString('GPT_TOKEN');
+}
+
+export function parsePerspectiveAPIKey() {
+	return envParseString('PERSPECTIVE_API_KEY');
 }
 
 export const CLIENT_OPTIONS: ClientOptions = {
@@ -37,5 +39,6 @@ declare module '@skyra/env-utilities' {
 		CLIENT_SECRET?: string;
 		PROMPT_WEBHOOK_URL?: string;
 		GPT_TOKEN?: string;
+		PERSPECTIVE_API_KEY?: string;
 	}
 }
