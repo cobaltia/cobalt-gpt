@@ -2,7 +2,7 @@ import { DurationFormatter } from '@sapphire/duration';
 import { EmbedBuilder, type Interaction, WebhookClient } from 'discord.js';
 import { Events } from '../lib/types/Events.js';
 import { sendMessage } from '#lib/gpt';
-import { analyzeMessage } from '#lib/perspective';
+import { analyzeMessage, type AnalyzeMessageResult } from '#lib/perspective';
 import { Listener } from '#lib/structures';
 import { parseWebhooks } from '#root/config';
 import { ratelimit } from '#utils/cooldown';
@@ -33,9 +33,12 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 			try {
 				await interaction.deferReply();
 				const prompt = interaction.options.getString('prompt', true);
-				await this.logPrompt(prompt, interaction).catch(console.error);
-				if (await analyzeMessage(prompt)) {
-					await interaction.editReply('Your message was flagged as toxic. Please try again.');
+				const analyzes = await analyzeMessage(prompt);
+				await this.logPrompt(prompt, analyzes, interaction).catch(console.error);
+				if (analyzes.score.includes(true)) {
+					await interaction.editReply({
+						content: 'Your message was flagged as toxic. Please try again.',
+					});
 					return;
 				}
 
@@ -43,18 +46,23 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 				await interaction.editReply(truncate(res.content, 2_000));
 				ratelimit.consume();
 			} catch (error) {
-				await interaction.editReply('An error occurred while processing your request.');
+				await interaction.editReply({ content: 'An error occurred while processing your request.' });
 				console.error(error);
 			}
 		}
 	}
 
-	private async logPrompt(prompt: string, interaction: Interaction<'cached'>) {
+	private async logPrompt(prompt: string, analyze: AnalyzeMessageResult, interaction: Interaction<'cached'>) {
 		const webhook = new WebhookClient({ url: webhooks.prompt });
 		const embed = new EmbedBuilder()
 			.setTitle('Prompt')
 			.setAuthor({ name: interaction.member.user.tag, iconURL: interaction.member.user.displayAvatarURL() })
 			.setDescription(prompt)
+			.addFields({
+				name: 'Attributes',
+				value: `**Toxicity:** ${analyze.attributes.TOXICITY}\n**Severe Toxicity:** ${analyze.attributes.SEVERE_TOXICITY}\n**Identity Attack:** ${analyze.attributes.IDENTITY_ATTACK}\n**Insult:** ${analyze.attributes.INSULT}\n**Profanity:** ${analyze.attributes.PROFANITY}\n**Threat:** ${analyze.attributes.THREAT}`,
+			})
+			.setColor(analyze.score.includes(true) ? 'Red' : 'Green')
 			.setFooter({ text: interaction.guildId, iconURL: interaction.guild.iconURL() ?? undefined })
 			.setTimestamp();
 		await webhook.send({ embeds: [embed] });
