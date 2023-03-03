@@ -1,7 +1,7 @@
 {
 	"name": "cobalt-gpt",
 	"version": "1.0.0",
-	"main": "index.js",
+	"main": "./dist/bot.js",
 	"type": "module",
 	"imports": {
 		"#lib/*": "./dist/lib/*.js",
