@@ -4,6 +4,5 @@ package.json
 yarn.lock
 .github/
 Dockerfile
-coverage
 .yarn/
 .yarnrc.yml
