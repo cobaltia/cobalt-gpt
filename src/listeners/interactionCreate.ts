@@ -37,7 +37,7 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 				await this.logPrompt(prompt, analyzes, interaction).catch(console.error);
 				if (analyzes.score.includes(true)) {
 					await interaction.editReply({
-						content: 'Your message was flagged as toxic. Please try again.',
+						content: 'Your prompt was flagged as potentially offensive. Please try again with a different prompt.',
 					});
 					return;
 				}
@@ -60,12 +60,18 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 			.setDescription(prompt)
 			.addFields({
 				name: 'Attributes',
-				value: `**Toxicity:** ${analyze.attributes.TOXICITY}\n**Severe Toxicity:** ${analyze.attributes.SEVERE_TOXICITY}\n**Identity Attack:** ${analyze.attributes.IDENTITY_ATTACK}\n**Insult:** ${analyze.attributes.INSULT}\n**Profanity:** ${analyze.attributes.PROFANITY}\n**Threat:** ${analyze.attributes.THREAT}`,
+				value: this.formatAttributes(analyze.attributes),
 			})
 			.setColor(analyze.score.includes(true) ? 'Red' : 'Green')
 			.setFooter({ text: interaction.guildId, iconURL: interaction.guild.iconURL() ?? undefined })
 			.setTimestamp();
 		await webhook.send({ embeds: [embed] });
+	}
+
+	private formatAttributes(attributes: AnalyzeMessageResult['attributes']) {
+		return Object.entries(attributes)
+			.map(([key, value]) => `**${key.split('_').join(' ')}:** ${value}`)
+			.join('\n');
 	}
 }
 
