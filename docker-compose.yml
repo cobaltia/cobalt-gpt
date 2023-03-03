@@ -1,0 +1,9 @@
+version: '3.9'
+
+services:
+  cobalt-gpt:
+    container_name: cobalt-gpt
+    build:
+      context: .
+    restart: unless-stopped
+    env_file: .env
