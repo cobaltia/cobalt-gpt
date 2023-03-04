@@ -1,5 +1,6 @@
+import { Buffer } from 'node:buffer';
 import { DurationFormatter } from '@sapphire/duration';
-import { EmbedBuilder, type Interaction, WebhookClient } from 'discord.js';
+import { EmbedBuilder, type Interaction, WebhookClient, AttachmentBuilder } from 'discord.js';
 import type { CreateModerationResponseResultsInner } from 'openai';
 import { Events } from '../lib/types/Events.js';
 import { moderation, sendMessage } from '#lib/gpt';
@@ -43,7 +44,16 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 				}
 
 				const res = await sendMessage(prompt);
-				await interaction.editReply(truncate(res.content, 2_000));
+				if (res.content.length > 2_000) {
+					const attachment = new AttachmentBuilder(Buffer.from(res.content.trim())).setName('response.txt');
+					await interaction.editReply({
+						content: 'Your response was too long to be sent in a message. Here is a file instead.',
+						files: [attachment],
+					});
+				} else {
+					await interaction.editReply(truncate(res.content.trim(), 2_000));
+				}
+
 				ratelimit.consume();
 			} catch (error) {
 				await interaction.editReply({ content: 'An error occurred while processing your request.' });
