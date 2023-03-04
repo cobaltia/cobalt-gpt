@@ -20,3 +20,15 @@ export async function sendMessage(prompt: string) {
 		throw new Error(err.message);
 	}
 }
+
+export async function moderation(prompt: string) {
+	try {
+		const response = await openai.createModeration({
+			input: prompt,
+		});
+		return response.data.results;
+	} catch (error) {
+		const err = error as Error;
+		throw new Error(err.message);
+	}
+}
