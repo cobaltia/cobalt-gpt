@@ -1,8 +1,8 @@
 import { DurationFormatter } from '@sapphire/duration';
 import { EmbedBuilder, type Interaction, WebhookClient } from 'discord.js';
+import type { CreateModerationResponseResultsInner } from 'openai';
 import { Events } from '../lib/types/Events.js';
-import { sendMessage } from '#lib/gpt';
-import { analyzeMessage, type AnalyzeMessageResult } from '#lib/perspective';
+import { moderation, sendMessage } from '#lib/gpt';
 import { Listener } from '#lib/structures';
 import { parseWebhooks } from '#root/config';
 import { ratelimit } from '#utils/cooldown';
@@ -33,9 +33,9 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 			try {
 				await interaction.deferReply();
 				const prompt = interaction.options.getString('prompt', true);
-				const analyzes = await analyzeMessage(prompt);
+				const analyzes = await moderation(prompt);
 				await this.logPrompt(prompt, analyzes, interaction).catch(console.error);
-				if (analyzes.score.includes(true)) {
+				if (analyzes[0].flagged) {
 					await interaction.editReply({
 						content: 'Your prompt was flagged as potentially offensive. Please try again with a different prompt.',
 					});
@@ -52,7 +52,11 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 		}
 	}
 
-	private async logPrompt(prompt: string, analyze: AnalyzeMessageResult, interaction: Interaction<'cached'>) {
+	private async logPrompt(
+		prompt: string,
+		analyze: CreateModerationResponseResultsInner[],
+		interaction: Interaction<'cached'>,
+	) {
 		const webhook = new WebhookClient({ url: webhooks.prompt });
 		const embed = new EmbedBuilder()
 			.setTitle('Prompt')
@@ -60,17 +64,20 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 			.setDescription(prompt)
 			.addFields({
 				name: 'Attributes',
-				value: this.formatAttributes(analyze.attributes),
+				value: this.formatAttributes(analyze),
 			})
-			.setColor(analyze.score.includes(true) ? 'Red' : 'Green')
+			.setColor(analyze[0].flagged ? 'Red' : 'Green')
 			.setFooter({ text: interaction.guildId, iconURL: interaction.guild.iconURL() ?? undefined })
 			.setTimestamp();
 		await webhook.send({ embeds: [embed] });
 	}
 
-	private formatAttributes(attributes: AnalyzeMessageResult['attributes']) {
-		return Object.entries(attributes)
-			.map(([key, value]) => `**${key.split('_').join(' ')}:** ${value}`)
+	private formatAttributes(analyze: CreateModerationResponseResultsInner[]) {
+		return Object.entries(analyze[0].category_scores)
+			.map(
+				([key, value]) =>
+					`**${key}:** ${value} ${Object.getOwnPropertyDescriptor(analyze[0].categories, key)?.value ? '•' : ''}`,
+			)
 			.join('\n');
 	}
 }
