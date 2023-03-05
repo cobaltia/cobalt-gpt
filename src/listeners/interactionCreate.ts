@@ -56,8 +56,14 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 
 				ratelimit.consume();
 			} catch (error) {
-				await interaction.editReply({ content: 'An error occurred while processing your request.' });
-				console.error(error);
+				try {
+					console.error(error);
+					if (!interaction.deferred && !interaction.replied) await interaction.deferReply();
+					await interaction.editReply({ content: 'An error occurred while processing your request.', components: [] });
+				} catch (error) {
+					const err = error as Error;
+					throw new Error(err.message);
+				}
 			}
 		}
 	}
