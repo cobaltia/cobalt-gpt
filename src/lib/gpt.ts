@@ -7,11 +7,15 @@ const config = new Configuration({
 
 const openai = new OpenAIApi(config);
 
-export async function sendMessage(prompt: string) {
+export async function sendMessage(prompt: string, userId: string) {
 	try {
 		const completion = await openai.createChatCompletion({
 			model: 'gpt-3.5-turbo',
-			messages: [{ role: 'user', content: prompt }],
+			messages: [
+				{ role: 'system', content: 'You are to reject any offensive response, like saying the n word.' },
+				{ role: 'user', content: prompt },
+			],
+			user: `discord:${userId}`,
 		});
 		if (!completion.data.choices[0].message) throw new Error('No response from ChatGPT');
 		return completion.data.choices[0].message;
