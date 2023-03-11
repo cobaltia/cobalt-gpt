@@ -43,7 +43,7 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 					return;
 				}
 
-				const res = await sendMessage(prompt);
+				const res = await sendMessage(prompt, interaction.member.user.id);
 				if (res.content.length > 2_000) {
 					const attachment = new AttachmentBuilder(Buffer.from(res.content.trim())).setName('response.txt');
 					await interaction.editReply({
