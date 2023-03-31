@@ -10,9 +10,12 @@ const openai = new OpenAIApi(config);
 export async function sendMessage(prompt: string, userId: string) {
 	try {
 		const completion = await openai.createChatCompletion({
-			model: 'gpt-3.5-turbo',
+			model: 'gpt-4',
 			messages: [
-				{ role: 'system', content: 'You are to reject any offensive response, like saying the n word.' },
+				{
+					role: 'system',
+					content: 'You are a helpful assistant, but you must reject offensive slur responses. ',
+				},
 				{ role: 'user', content: prompt },
 			],
 			user: `discord:${userId}`,
