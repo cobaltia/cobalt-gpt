@@ -44,6 +44,7 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 				}
 
 				const res = await sendMessage(prompt, interaction.member.user.id);
+				if (!res.content) throw new Error('No response from ChatGPT');
 				if (res.content.length > 2_000) {
 					const attachment = new AttachmentBuilder(Buffer.from(res.content.trim())).setName('response.txt');
 					await interaction.editReply({
