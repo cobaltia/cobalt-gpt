@@ -8,7 +8,7 @@ export async function createGuild(id: string, data?: IGuild) {
 	return db.guild.create({ data: { id, ...data } });
 }
 
-export async function getOrCreateGuild(id: string, data: IGuild) {
+export async function getOrCreateGuild(id: string, data?: IGuild) {
 	try {
 		return await getGuild(id);
 	} catch {

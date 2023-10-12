@@ -16,6 +16,14 @@ export async function createUser(userId: string, guildId: string, data?: IUser) 
 	});
 }
 
+export async function getOrCreateUser(userId: string, guildId: string, data?: IUser) {
+	try {
+		return await getUser(userId, guildId);
+	} catch {
+		return await createUser(userId, guildId, data);
+	}
+}
+
 export async function deleteUser(userId: string, guildId: string) {
 	return db.user.delete({
 		where: { userId: { id: userId, guildId } },

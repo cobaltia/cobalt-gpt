@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Client } from 'discord.js';
-import { ListenerRegistry, container } from '#lib/structures';
+import { CommandRegistry, ListenerRegistry, container } from '#lib/structures';
 import { CLIENT_OPTIONS } from '#root/config';
 
 export class BotClient extends Client {
@@ -10,7 +10,7 @@ export class BotClient extends Client {
 	}
 
 	public override async login(token?: string) {
-		await Promise.all([ListenerRegistry(this)]);
+		await Promise.all([ListenerRegistry(this), CommandRegistry(this)]);
 		return super.login(token);
 	}
 }
