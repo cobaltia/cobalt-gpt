@@ -2,13 +2,13 @@ import type { Guild } from '@prisma/client';
 import { container } from '#lib/structures';
 
 const { db } = container;
-type Iguild = Partial<Omit<Guild, 'id'>>;
+type IGuild = Partial<Omit<Guild, 'id'>>;
 
-export async function createGuild(id: string, data?: Iguild) {
+export async function createGuild(id: string, data?: IGuild) {
 	return db.guild.create({ data: { id, ...data } });
 }
 
-export async function getOrCreateGuild(id: string, data: Iguild) {
+export async function getOrCreateGuild(id: string, data: IGuild) {
 	try {
 		return await getGuild(id);
 	} catch {
@@ -24,7 +24,7 @@ export async function getGuild(id: string) {
 	return db.guild.findUniqueOrThrow({ where: { id } });
 }
 
-export async function updateGuild(id: string, data?: Iguild) {
+export async function updateGuild(id: string, data?: IGuild) {
 	return db.guild.upsert({
 		create: {
 			id,
