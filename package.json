@@ -10,7 +10,8 @@
 		"#lib/structures/listeners": "./dist/lib/structures/listeners/index.js",
 		"#root/*": "./dist/*.js",
 		"#utils/*": "./dist/lib/utils/*.js",
-		"#root/interactions": "./dist/interactions/index.js"
+		"#root/interactions": "./dist/interactions/index.js",
+		"#lib/database": "./dist/lib/database/index.js"
 	},
 	"scripts": {
 		"test:typescript": "tsc -b src",

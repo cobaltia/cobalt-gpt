@@ -44,7 +44,7 @@ abstract class StatsCommand extends GenericCommand {
 				iconURL: interaction.guild.iconURL() ?? undefined,
 			})
 			.setDescription(
-				`**Total Prompts** - ${guild.totalRuns}\n**Total Successful Runs** - ${guild.numOfSuccessfulRuns}\n**Total Failed Runs** - ${guild.numOfFailedRuns}\n**Most Active User** - ${member.user.username} (${user.totalRuns}})`,
+				`**Total Prompts** - ${guild.totalRuns}\n**Total Successful Runs** - ${guild.numOfSuccessfulRuns}\n**Total Failed Runs** - ${guild.numOfFailedRuns}\n**Most Active User** - ${member.user.username} (${user.totalRuns})`,
 			)
 			.setTimestamp();
 		return interaction.reply({ embeds: [embed] });
