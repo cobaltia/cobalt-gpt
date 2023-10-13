@@ -12,6 +12,7 @@ datasource db {
 
 model Guild {
   id                  String @id @map("id") @db.VarChar(18)
+  totalRuns           Int    @default(0) @map("total_runs")
   numOfSuccessfulRuns Int    @default(0) @map("num_of_successful_runs")
   numOfFailedRuns     Int    @default(0) @map("num_of_failed_runs")
   imagesGenerated     Int    @default(0) @map("images_generated")
@@ -23,6 +24,7 @@ model Guild {
 
 model User {
   id                  String @map("id") @db.VarChar(18)
+  totalRuns           Int    @default(0) @map("total_runs")
   numOfSuccessfulRuns Int    @default(0) @map("num_of_successful_runs")
   numOfFailedRuns     Int    @default(0) @map("num_of_failed_runs")
   imagesGenerated     Int    @default(0) @map("images_generated")

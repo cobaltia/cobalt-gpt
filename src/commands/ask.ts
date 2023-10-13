@@ -8,6 +8,7 @@ import {
 	AttachmentBuilder,
 } from 'discord.js';
 import type { CreateModerationResponseResultsInner } from 'openai';
+import { updateInfractions } from '#lib/database';
 import { moderation, sendMessage } from '#lib/gpt';
 import { GenericCommand } from '#lib/structures';
 import { parseWebhooks } from '#root/config';
@@ -15,6 +16,7 @@ import { ratelimit } from '#utils/cooldown';
 import { truncate } from '#utils/utils';
 
 const webhooks = parseWebhooks();
+const formatter = new DurationFormatter();
 
 abstract class AskCommand extends GenericCommand {
 	public constructor() {
@@ -25,7 +27,6 @@ abstract class AskCommand extends GenericCommand {
 	}
 
 	public override async run(interaction: ChatInputCommandInteraction<'cached'>) {
-		const formatter = new DurationFormatter();
 		if (ratelimit.limited) {
 			return interaction.reply({
 				content: `You have reached the global ratelimit. Try again in ${formatter.format(ratelimit.remainingTime)}.`,
@@ -41,6 +42,7 @@ abstract class AskCommand extends GenericCommand {
 			await interaction.editReply({
 				content: 'Your prompt was flagged as potentially offensive. Please try again with a different prompt.',
 			});
+			await updateInfractions(interaction.member.user.id, interaction.guildId);
 		}
 
 		const res = await sendMessage(prompt, interaction.member.user.id);

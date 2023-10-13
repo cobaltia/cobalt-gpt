@@ -36,3 +36,7 @@ export async function updateGuild(id: string, data?: IGuild) {
 		where: { id },
 	});
 }
+
+export async function getMostActiveUser(id: string) {
+	return db.user.findFirstOrThrow({ where: { guildId: id }, orderBy: { numOfSuccessfulRuns: 'desc' } });
+}
