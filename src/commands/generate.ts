@@ -1,27 +1,19 @@
-import { Buffer } from 'node:buffer';
 import { DurationFormatter } from '@sapphire/duration';
-import {
-	WebhookClient,
-	type ChatInputCommandInteraction,
-	type Interaction,
-	EmbedBuilder,
-	AttachmentBuilder,
-} from 'discord.js';
+import { WebhookClient, type ChatInputCommandInteraction, type Interaction, EmbedBuilder } from 'discord.js';
 import type Moderation from 'openai';
 import { updateInfractions } from '#lib/database';
-import { moderation, sendMessage } from '#lib/gpt';
+import { generateImage, moderation } from '#lib/gpt';
 import { GenericCommand } from '#lib/structures';
 import { parseWebhooks } from '#root/config';
 import { ratelimit } from '#utils/cooldown';
-import { truncate } from '#utils/utils';
 
 const webhooks = parseWebhooks();
 const formatter = new DurationFormatter();
 
-abstract class AskCommand extends GenericCommand {
+abstract class GenerateCommand extends GenericCommand {
 	public constructor() {
 		super({
-			name: 'ask',
+			name: 'generate',
 			devOnly: false,
 		});
 	}
@@ -46,17 +38,9 @@ abstract class AskCommand extends GenericCommand {
 			return;
 		}
 
-		const res = await sendMessage(prompt, interaction.member.user.id);
-		if (!res.content) throw new Error('No response from ChatGPT');
-		if (res.content.length > 2_000) {
-			const attachment = new AttachmentBuilder(Buffer.from(res.content.trim())).setName('response.txt');
-			await interaction.editReply({
-				content: 'Your response was too long to be sent in a message. Here is a file instead.',
-				files: [attachment],
-			});
-		} else {
-			await interaction.editReply(truncate(res.content.trim(), 2_000));
-		}
+		const res = await generateImage(prompt, interaction.member.user.id);
+		if (!res[0].url) throw new Error('No response from ChatGPT');
+		await interaction.editReply(res[0].url);
 
 		ratelimit.consume();
 	}
@@ -91,4 +75,4 @@ abstract class AskCommand extends GenericCommand {
 	}
 }
 
-export default AskCommand;
+export default GenerateCommand;
