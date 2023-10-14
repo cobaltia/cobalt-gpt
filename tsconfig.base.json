@@ -6,7 +6,7 @@
 		"allowUnreachableCode": false,
 		"allowUnusedLabels": false,
 		"noImplicitOverride": true,
-		"importsNotUsedAsValues": "error",
+		"verbatimModuleSyntax": true,
 		"newLine": "LF",
 		"noEmitHelpers": true,
 		"removeComments": false,
