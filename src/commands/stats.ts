@@ -37,15 +37,21 @@ abstract class StatsCommand extends GenericCommand {
 		const guild = await getOrCreateGuild(interaction.guildId);
 		const user = await getMostActiveUser(interaction.guildId);
 		const member = await interaction.guild.members.fetch(user.id);
+		const stats = [
+			`**Total Prompts**: ${guild.totalRuns}`,
+			`**Total Successful Runs**: ${guild.numOfSuccessfulRuns}`,
+			`**Total Images Generated**: ${guild.imagesGenerated}`,
+			`**Total Failed Runs**: ${guild.numOfFailedRuns}`,
+			`**Most Active User**: ${member.user.username} (${user.totalRuns})`,
+			`**Total Infractions**: ${guild.infractions}`,
+		];
 		const embed = new EmbedBuilder()
 			.setTitle('Guild Stats')
 			.setAuthor({
 				name: interaction.guild.name,
 				iconURL: interaction.guild.iconURL() ?? undefined,
 			})
-			.setDescription(
-				`**Total Prompts** - ${guild.totalRuns}\n**Total Successful Runs** - ${guild.numOfSuccessfulRuns}\n**Total Failed Runs** - ${guild.numOfFailedRuns}\n**Most Active User** - ${member.user.username} (${user.totalRuns})`,
-			)
+			.setDescription(stats.join('\n'))
 			.setTimestamp();
 		return interaction.reply({ embeds: [embed] });
 	}
@@ -53,15 +59,20 @@ abstract class StatsCommand extends GenericCommand {
 	private async user(interaction: ChatInputCommandInteraction<'cached'>) {
 		const userArg = interaction.options.getUser('user', false);
 		const user = await getOrCreateUser((userArg ?? interaction.user).id, interaction.guildId);
+		const stats = [
+			`**Total Prompts**: ${user.totalRuns}`,
+			`**Total Successful Runs**: ${user.numOfSuccessfulRuns}`,
+			`**Total Failed Runs**: ${user.numOfFailedRuns}`,
+			`**Total Images Generated**: ${user.imagesGenerated}`,
+			`**Total Infractions**: ${user.infractions}`,
+		];
 		const embed = new EmbedBuilder()
 			.setTitle(`${(userArg ?? interaction.user).username}'s Stats`)
 			.setAuthor({
 				name: (userArg ?? interaction.user).username,
 				iconURL: (userArg ?? interaction.user).avatarURL() ?? undefined,
 			})
-			.setDescription(
-				`**Total Prompts** - ${user.totalRuns}\n**Total Successful Runs** - ${user.numOfSuccessfulRuns}\n**Total Failed Runs** - ${user.numOfFailedRuns}`,
-			)
+			.setDescription(stats.join('\n'))
 			.setTimestamp();
 		return interaction.reply({ embeds: [embed] });
 	}
