@@ -38,7 +38,7 @@ abstract class AskCommand extends GenericCommand {
 		await interaction.deferReply();
 		const prompt = interaction.options.getString('prompt', true);
 		const image = interaction.options.getAttachment('image');
-		if (!imageFormats.includes(image?.contentType?.split('/')[1].split(';')[0] ?? '')) {
+		if (image && !imageFormats.includes(image.contentType?.split('/')[1].split(';')[0] ?? '')) {
 			await interaction.editReply({ content: 'Invalid image format. Please try again with a different image.' });
 			return;
 		}

@@ -1,4 +1,5 @@
 import OpenAI, { type ClientOptions } from 'openai';
+import type { ChatCompletionContentPart } from 'openai/resources';
 import { parseGptToken } from '#root/config';
 
 const config: ClientOptions = {
@@ -9,6 +10,9 @@ const openai = new OpenAI(config);
 
 export async function sendMessage(prompt: string, userId: string, image: string | null) {
 	try {
+		const content: ChatCompletionContentPart[] = [{ type: 'text', text: prompt }];
+		if (image) content.push({ type: 'image_url', image_url: { url: image } });
+
 		const completion = await openai.chat.completions.create({
 			model: 'gpt-4-vision-preview',
 			max_tokens: 4_096,
@@ -19,10 +23,7 @@ export async function sendMessage(prompt: string, userId: string, image: string 
 				},
 				{
 					role: 'user',
-					content: [
-						{ type: 'text', text: prompt },
-						{ type: 'image_url', image_url: { url: image ?? undefined } },
-					],
+					content,
 				},
 			],
 			user: `discord:${userId}`,
