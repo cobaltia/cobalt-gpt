@@ -5,6 +5,7 @@ import {
 	getOrCreateUser,
 	updateFailedRuns,
 	updateGuild,
+	updateInfractions,
 	updateSuccessfulRuns,
 	updateUser,
 } from '#lib/database';
@@ -42,7 +43,17 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 			try {
 				console.error(error);
 				if (!interaction.deferred && !interaction.replied) await interaction.deferReply();
-				await interaction.editReply({ content: 'An error occurred while processing your request.', components: [] });
+				// @ts-expect-error: unknown error type
+				if (error?.message.includes('Your request was rejected as a result of our safety system.')) {
+					await interaction.editReply({
+						content: 'Your prompt was flagged as potentially offensive. Please try again with a different prompt.',
+					});
+					await updateInfractions(interaction.member.user.id, interaction.guildId);
+					return;
+				} else {
+					await interaction.editReply({ content: 'An error occurred while processing your request.', components: [] });
+				}
+
 				if (['ask', 'generate'].includes(command.name))
 					await updateFailedRuns(interaction.user.id, interaction.guildId);
 			} catch (error) {

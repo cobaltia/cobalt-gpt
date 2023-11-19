@@ -7,16 +7,23 @@ const config: ClientOptions = {
 
 const openai = new OpenAI(config);
 
-export async function sendMessage(prompt: string, userId: string) {
+export async function sendMessage(prompt: string, userId: string, image: string | null) {
 	try {
 		const completion = await openai.chat.completions.create({
-			model: 'gpt-4',
+			model: 'gpt-4-vision-preview',
+			max_tokens: 4_096,
 			messages: [
 				{
 					role: 'system',
-					content: 'You are a helpful assistant, but you must reject offensive slur responses. ',
+					content: 'You are a helpful assistant, but you must reject offensive slur responses.',
 				},
-				{ role: 'user', content: prompt },
+				{
+					role: 'user',
+					content: [
+						{ type: 'text', text: prompt },
+						{ type: 'image_url', image_url: { url: image ?? undefined } },
+					],
+				},
 			],
 			user: `discord:${userId}`,
 		});
@@ -42,7 +49,11 @@ export async function moderation(prompt: string) {
 
 export async function generateImage(prompt: string, userId: string) {
 	try {
-		const image = await openai.images.generate({ prompt, user: `discord:${userId}` });
+		const image = await openai.images.generate({
+			model: 'dall-e-3',
+			prompt,
+			user: `discord:${userId}`,
+		});
 		return image.data;
 	} catch (error) {
 		const err = error as Error;

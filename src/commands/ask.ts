@@ -17,6 +17,7 @@ import { truncate } from '#utils/utils';
 
 const webhooks = parseWebhooks();
 const formatter = new DurationFormatter();
+const imageFormats = ['png', 'jpeg', 'gif', 'webp'];
 
 abstract class AskCommand extends GenericCommand {
 	public constructor() {
@@ -36,6 +37,12 @@ abstract class AskCommand extends GenericCommand {
 
 		await interaction.deferReply();
 		const prompt = interaction.options.getString('prompt', true);
+		const image = interaction.options.getAttachment('image');
+		if (!imageFormats.includes(image?.contentType?.split('/')[1].split(';')[0] ?? '')) {
+			await interaction.editReply({ content: 'Invalid image format. Please try again with a different image.' });
+			return;
+		}
+
 		const analyzes = await moderation(prompt);
 		await this.logPrompt(prompt, analyzes, interaction).catch(console.error);
 		if (analyzes.flagged) {
@@ -46,7 +53,7 @@ abstract class AskCommand extends GenericCommand {
 			return;
 		}
 
-		const res = await sendMessage(prompt, interaction.member.user.id);
+		const res = await sendMessage(prompt, interaction.member.user.id, image?.url ?? null);
 		if (!res.content) throw new Error('No response from ChatGPT');
 		if (res.content.length > 2_000) {
 			const attachment = new AttachmentBuilder(Buffer.from(res.content.trim())).setName('response.txt');
