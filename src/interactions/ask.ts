@@ -10,5 +10,10 @@ export const askCommand = {
 			type: ApplicationCommandOptionType.String,
 			required: true,
 		},
+		{
+			name: 'image',
+			description: 'The image to use as context.',
+			type: ApplicationCommandOptionType.Attachment,
+		},
 	],
 };

@@ -39,7 +39,7 @@
 		"discord-api-types": "^0.37.46",
 		"discord.js": "^14.11.0",
 		"globby": "^13.2.0",
-		"openai": "^4.12.1"
+		"openai": "^4.16.0"
 	},
 	"devDependencies": {
 		"@types/node": "^20.3.2",
