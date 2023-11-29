@@ -50,6 +50,12 @@ abstract class InteractionCreateListener extends Listener<typeof Events.Interact
 					});
 					await updateInfractions(interaction.member.user.id, interaction.guildId);
 					return;
+					// @ts-expect-error: unknown error type
+				} else if (error?.message.includes('Error: 429 You exceeded your current quota')) {
+					await interaction.editReply({
+						content:
+							'Max quota reached. Please try again later. Help alleviate the cost by donating [here](https://github.com/sponsors/JuanPablo2655)',
+					});
 				} else {
 					await interaction.editReply({ content: 'An error occurred while processing your request.', components: [] });
 				}
