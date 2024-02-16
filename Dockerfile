@@ -11,10 +11,8 @@ FROM base as builder
 
 COPY --chown=node:node tsconfig.base.json .
 COPY --chown=node:node src/ src/
-COPY --chown=node:node prisma/ prisma/
 
 RUN yarn install --immutable
-RUN yarn prisma generate
 RUN yarn run build
 
 FROM builder as runner

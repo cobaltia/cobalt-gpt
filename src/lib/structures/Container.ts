@@ -6,7 +6,6 @@ export interface Container {
 	commands: Collection<string, GenericCommand>;
 }
 
-// @ts-expect-error: injected variables not initiated yet
 export const container: Container = {
 	listeners: new Collection<string, Listener>(),
 	commands: new Collection<string, GenericCommand>(),

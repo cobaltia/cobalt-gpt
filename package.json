@@ -30,7 +30,6 @@
 	"license": "MIT",
 	"private": true,
 	"dependencies": {
-		"@prisma/client": "^4.16.1",
 		"@sapphire/duration": "^1.1.0",
 		"@sapphire/ratelimits": "^2.4.6",
 		"@sapphire/timestamp": "^1.0.1",
@@ -46,7 +45,6 @@
 		"eslint": "^8.43.0",
 		"eslint-config-neon": "^0.1.47",
 		"prettier": "^2.8.8",
-		"prisma": "^4.16.1",
 		"tslib": "^2.6.0",
 		"typescript": "^5.1.6"
 	},

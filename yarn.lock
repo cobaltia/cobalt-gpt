@@ -556,34 +556,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/client@npm:^4.16.1":
-  version: 4.16.1
-  resolution: "@prisma/client@npm:4.16.1"
-  dependencies:
-    "@prisma/engines-version": 4.16.0-66.b20ead4d3ab9e78ac112966e242ded703f4a052c
-  peerDependencies:
-    prisma: "*"
-  peerDependenciesMeta:
-    prisma:
-      optional: true
-  checksum: da715b6e930f56493cb7c6232b179250a4e93bbc2b5fe42a84cb9511d127b6fd89e1271f83e1d531bd4fdd7e87f6ac0701b30174cf89212ae7da88097de31026
-  languageName: node
-  linkType: hard
-
-"@prisma/engines-version@npm:4.16.0-66.b20ead4d3ab9e78ac112966e242ded703f4a052c":
-  version: 4.16.0-66.b20ead4d3ab9e78ac112966e242ded703f4a052c
-  resolution: "@prisma/engines-version@npm:4.16.0-66.b20ead4d3ab9e78ac112966e242ded703f4a052c"
-  checksum: 23183cab33f95e0711cd6cee7642f4beeeb77b8b0aa54b419f55097bfb96863a11a28f6509ab27fef0ea794522e188044ce850993a25c341333f8305711a255f
-  languageName: node
-  linkType: hard
-
-"@prisma/engines@npm:4.16.1":
-  version: 4.16.1
-  resolution: "@prisma/engines@npm:4.16.1"
-  checksum: 7b8c1a9e20434edaa919fb24585ebff573c4ace787ea5a135dfefde3571ae31d3f0b0347397774c38be6d2e3fc0087d4e21a2720fe9f7a66ffd870e34377040f
-  languageName: node
-  linkType: hard
-
 "@rushstack/eslint-patch@npm:^1.2.0":
   version: 1.2.0
   resolution: "@rushstack/eslint-patch@npm:1.2.0"
@@ -1620,7 +1592,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "cobalt-gpt@workspace:."
   dependencies:
-    "@prisma/client": ^4.16.1
     "@sapphire/duration": ^1.1.0
     "@sapphire/ratelimits": ^2.4.6
     "@sapphire/timestamp": ^1.0.1
@@ -1634,7 +1605,6 @@ __metadata:
     globby: ^13.2.0
     openai: ^4.16.0
     prettier: ^2.8.8
-    prisma: ^4.16.1
     tslib: ^2.6.0
     typescript: ^5.1.6
   languageName: unknown
@@ -5073,18 +5043,6 @@ __metadata:
   bin:
     prettier: bin-prettier.js
   checksum: b49e409431bf129dd89238d64299ba80717b57ff5a6d1c1a8b1a28b590d998a34e083fa13573bc732bb8d2305becb4c9a4407f8486c81fa7d55100eb08263cf8
-  languageName: node
-  linkType: hard
-
-"prisma@npm:^4.16.1":
-  version: 4.16.1
-  resolution: "prisma@npm:4.16.1"
-  dependencies:
-    "@prisma/engines": 4.16.1
-  bin:
-    prisma: build/index.js
-    prisma2: build/index.js
-  checksum: eb0f43970464fbaa6ba190a714f23d00acd39dcc14fd8a7183dffc51a548cc32040cc5360415787578749862af7501a7bedcf9f2a0e64a3f82e3af402e9439d7
   languageName: node
   linkType: hard
 
