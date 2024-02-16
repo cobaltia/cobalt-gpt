@@ -8,7 +8,6 @@ import {
 	AttachmentBuilder,
 } from 'discord.js';
 import type Moderation from 'openai';
-import { updateInfractions } from '#lib/database';
 import { moderation, sendMessage } from '#lib/gpt';
 import { GenericCommand } from '#lib/structures';
 import { parseWebhooks } from '#root/config';
@@ -49,7 +48,6 @@ abstract class AskCommand extends GenericCommand {
 			await interaction.editReply({
 				content: 'Your prompt was flagged as potentially offensive. Please try again with a different prompt.',
 			});
-			await updateInfractions(interaction.member.user.id, interaction.guildId);
 			return;
 		}
 
