@@ -14,7 +14,7 @@ export async function sendMessage(prompt: string, userId: string, image: string 
 		if (image) content.push({ type: 'image_url', image_url: { url: image } });
 
 		const completion = await openai.chat.completions.create({
-			model: 'gpt-4-vision-preview',
+			model: 'gpt-4o',
 			max_tokens: 4_096,
 			messages: [
 				{

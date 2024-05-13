@@ -1,5 +1,5 @@
 import { URL } from 'node:url';
-import { envParseString, setup } from '@skyra/env-utilities';
+import { envParseArray, envParseString, setup, type ArrayString } from '@skyra/env-utilities';
 import { type ClientOptions, GatewayIntentBits, Options, Partials } from 'discord.js';
 
 setup(new URL('../.env', import.meta.url));
@@ -21,8 +21,8 @@ export function parseGptToken() {
 	return envParseString('GPT_TOKEN');
 }
 
-export function parsePerspectiveAPIKey() {
-	return envParseString('PERSPECTIVE_API_KEY');
+export function parseServers() {
+	return envParseArray('SERVERS');
 }
 
 export const CLIENT_OPTIONS: ClientOptions = {
@@ -39,6 +39,6 @@ declare module '@skyra/env-utilities' {
 		CLIENT_SECRET?: string;
 		PROMPT_WEBHOOK_URL?: string;
 		GPT_TOKEN?: string;
-		PERSPECTIVE_API_KEY?: string;
+		SERVERS?: ArrayString;
 	}
 }
