@@ -8,7 +8,7 @@ on:
 jobs:
   typescript:
     name: Typescript
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -23,7 +23,7 @@ jobs:
         run: yarn test:typescript
   prettier:
     name: Prettier
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -38,7 +38,7 @@ jobs:
         run: yarn test:prettier
   Linting:
     name: Eslint
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
