@@ -1,15 +1,22 @@
-import OpenAI, { type ClientOptions } from 'openai';
+import OpenAI from 'openai';
 import type { ChatCompletionContentPart } from 'openai/resources';
 import { parseGptToken } from '#root/config';
 
-const config: ClientOptions = {
-	apiKey: parseGptToken(),
-};
+function getOpenAiClient(model: string) {
+	if (model.startsWith('grok')) {
+		return new OpenAI({
+			apiKey: 'test',
+			baseURL: 'https://api.x.ai/v1',
+		});
+	}
+	return new OpenAI({
+		apiKey: parseGptToken(),
+	});
+}
 
-const openai = new OpenAI(config);
-
-export async function sendMessage(prompt: string, userId: string, image: string | null) {
+export async function sendMessage(prompt: string, userId: string, image: string | null, model = 'gpt-4o') {
 	try {
+		const openai = getOpenAiClient(model);
 		const content: ChatCompletionContentPart[] = [{ type: 'text', text: prompt }];
 		if (image) content.push({ type: 'image_url', image_url: { url: image } });
 
@@ -38,6 +45,7 @@ export async function sendMessage(prompt: string, userId: string, image: string 
 
 export async function moderation(prompt: string) {
 	try {
+		const openai = getOpenAiClient('gpt-4o');
 		const response = await openai.moderations.create({
 			input: prompt,
 		});
@@ -48,8 +56,9 @@ export async function moderation(prompt: string) {
 	}
 }
 
-export async function generateImage(prompt: string, userId: string) {
+export async function generateImage(prompt: string, userId: string, model = 'dall-e-3') {
 	try {
+		const openai = getOpenAiClient(model);
 		const image = await openai.images.generate({
 			model: 'dall-e-3',
 			prompt,

@@ -1,19 +1,22 @@
-FROM node:18 as base
+FROM node:23 as base
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+RUN corepack prepare pnpm@10.1.0 --activate
 
 WORKDIR /cobaltgpt
 
-COPY --chown=node:node yarn.lock .
+COPY --chown=node:node pnpm-lock.yaml .
 COPY --chown=node:node package.json .
-COPY --chown=node:node .yarnrc.yml .
-COPY --chown=node:node .yarn/ .yarn/
 
 FROM base as builder
 
 COPY --chown=node:node tsconfig.base.json .
 COPY --chown=node:node src/ src/
 
-RUN yarn install --immutable
-RUN yarn run build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build
 
 FROM builder as runner
 
@@ -24,4 +27,4 @@ COPY .env ./.env
 
 USER node
 
-CMD ["yarn", "run", "start"]
+CMD ["pnpm", "run", "start"]

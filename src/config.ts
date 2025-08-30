@@ -1,6 +1,8 @@
 import { URL } from 'node:url';
 import { envParseArray, envParseString, setup, type ArrayString } from '@skyra/env-utilities';
-import { type ClientOptions, GatewayIntentBits, Options, Partials } from 'discord.js';
+import { type ClientOptions, GatewayIntentBits, Partials } from 'discord.js';
+import { Time } from '@sapphire/timestamp';
+import { BucketScope, LogLevel } from '@sapphire/framework';
 
 setup(new URL('../.env', import.meta.url));
 
@@ -29,8 +31,14 @@ export const CLIENT_OPTIONS: ClientOptions = {
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 	partials: [Partials.Message, Partials.Channel],
 	allowedMentions: { repliedUser: false },
-	makeCache: Options.cacheEverything(),
-	sweepers: { ...Options.DefaultSweeperSettings },
+	defaultCooldown: {
+		delay: 5 * Time.Second,
+		limit: 1,
+		scope: BucketScope.User,
+	},
+	logger: {
+		level: process.env.NODE_ENV === 'production' ? LogLevel.Info : LogLevel.Debug,
+	},
 };
 
 declare module '@skyra/env-utilities' {

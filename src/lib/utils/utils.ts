@@ -1,17 +1,3 @@
-import { URL } from 'node:url';
-import { isClass } from '@sapphire/utilities';
-import type { Listener } from '#lib/structures';
-
-export type Structures = Listener;
-
-export async function resolveFile<T>(file: string) {
-	const rootFolder = new URL('../../../', import.meta.url);
-	const resolvedPath = new URL(file, rootFolder);
-	const File = await (await import(resolvedPath.toString())).default;
-	if (!isClass(File)) return null;
-	return new File() as T;
-}
-
 /**
  * Truncate a string to a certain length
  *

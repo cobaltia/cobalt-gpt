@@ -1,17 +1,14 @@
-import { Listener } from '#lib/structures';
-import { Events } from '#lib/types/Events';
+import { Events, Listener } from '@sapphire/framework';
+import type { Client } from 'discord.js';
+export class ReadyListener extends Listener<typeof Events.ClientReady> {
+	public run(client: Client) {
+		const logger = this.container.logger;
+		const { username, id } = client.user!;
+		const commands = client.stores.get('commands');
+		const listeners = client.stores.get('listeners');
 
-abstract class ReadyListener extends Listener<typeof Events.ClientReady> {
-	public constructor() {
-		super({
-			name: Events.ClientReady,
-			once: true,
-		});
-	}
-
-	public async run() {
-		console.log('Online!');
+		logger.info(`Successfully logged in as ${username} (${id})`);
+		logger.info(`Loaded ${commands.size} commands`);
+		logger.info(`Loaded ${listeners.size} listeners`);
 	}
 }
-
-export default ReadyListener;

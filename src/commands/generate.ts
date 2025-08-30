@@ -1,30 +1,31 @@
-import { DurationFormatter } from '@sapphire/duration';
-import { WebhookClient, type ChatInputCommandInteraction, type Interaction, EmbedBuilder } from 'discord.js';
+import { WebhookClient, EmbedBuilder } from 'discord.js';
 import type Moderation from 'openai';
 import { generateImage, moderation } from '#lib/gpt';
-import { GenericCommand } from '#lib/structures';
 import { parseWebhooks } from '#root/config';
-import { ratelimit } from '#utils/cooldown';
+import { Command } from '@sapphire/framework';
 
 const webhooks = parseWebhooks();
-const formatter = new DurationFormatter();
 
-abstract class GenerateCommand extends GenericCommand {
-	public constructor() {
-		super({
-			name: 'generate',
-			devOnly: false,
+export class GenerateCommand extends Command {
+	public constructor(context: Command.LoaderContext, options: Command.Options) {
+		super(context, {
+			...options,
+			description: 'Generate an image with DALL·E.',
 		});
 	}
 
-	public override async run(interaction: ChatInputCommandInteraction<'cached'>) {
-		if (ratelimit.limited) {
-			return interaction.reply({
-				content: `You have reached the global ratelimit. Try again in ${formatter.format(ratelimit.remainingTime)}.`,
-				ephemeral: true,
-			});
-		}
+	public override registerApplicationCommands(registry: Command.Registry) {
+		registry.registerChatInputCommand(builder =>
+			builder
+				.setName(this.name)
+				.setDescription(this.description)
+				.addStringOption(option =>
+					option.setName('prompt').setDescription('The prompt to generate an image.').setRequired(true),
+				),
+		);
+	}
 
+	public async run(interaction: Command.ChatInputCommandInteraction) {
 		await interaction.deferReply();
 		const prompt = interaction.options.getString('prompt', true);
 		const analyzes = await moderation(prompt);
@@ -36,29 +37,27 @@ abstract class GenerateCommand extends GenericCommand {
 			return;
 		}
 
-		const res = await generateImage(prompt, interaction.member.user.id);
-		if (!res[0].url) throw new Error('No response from ChatGPT');
+		const res = await generateImage(prompt, interaction.user.id);
+		if (!res || !Array.isArray(res) || !res[0]?.url) throw new Error('No response from DALL·E');
 		await interaction.editReply(res[0].url);
-
-		ratelimit.consume();
 	}
 
 	private async logPrompt(
 		prompt: string,
 		analyze: Moderation.Moderations.Moderation,
-		interaction: Interaction<'cached'>,
+		interaction: Command.ChatInputCommandInteraction,
 	) {
 		const webhook = new WebhookClient({ url: webhooks.prompt });
 		const embed = new EmbedBuilder()
 			.setTitle('Prompt')
-			.setAuthor({ name: interaction.member.user.tag, iconURL: interaction.member.user.displayAvatarURL() })
+			.setAuthor({ name: interaction.user.tag, iconURL: interaction.user.displayAvatarURL() })
 			.setDescription(prompt)
 			.addFields({
 				name: 'Attributes',
 				value: this.formatAttributes(analyze),
 			})
 			.setColor(analyze.flagged ? 'Red' : 'Green')
-			.setFooter({ text: interaction.guildId, iconURL: interaction.guild.iconURL() ?? undefined })
+			.setFooter({ text: interaction.guildId!, iconURL: interaction.guild!.iconURL() ?? undefined })
 			.setTimestamp();
 		await webhook.send({ embeds: [embed] });
 	}
@@ -72,5 +71,3 @@ abstract class GenerateCommand extends GenericCommand {
 			.join('\n');
 	}
 }
-
-export default GenerateCommand;

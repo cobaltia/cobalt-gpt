@@ -16,11 +16,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: yarn
+          cache: pnpm
       - name: Install dependencies
-        run: yarn --immutable
+        run: pnpm --frozen-lockfile
       - name: Run TypeScript compiler
-        run: yarn test:typescript
+        run: pnpm run test:typescript
   prettier:
     name: Prettier
     runs-on: blacksmith-4vcpu-ubuntu-2404
@@ -31,11 +31,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: yarn
+          cache: pnpm
       - name: Install dependencies
-        run: yarn --immutable
+        run: pnpm --frozen-lockfile
       - name: Run Prettier
-        run: yarn test:prettier
+        run: pnpm run test:prettier
   Linting:
     name: Eslint
     runs-on: blacksmith-4vcpu-ubuntu-2404
@@ -46,8 +46,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: yarn
+          cache: pnpm
       - name: Install dependencies
-        run: yarn --immutable
+        run: pnpm --frozen-lockfile
       - name: Run Eslint
-        run: yarn lint --fix=false
+        run: pnpm run lint --fix=false
