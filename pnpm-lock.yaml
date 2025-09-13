@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@sapphire/discord.js-utilities':
+        specifier: ^7.3.3
+        version: 7.3.3
       '@sapphire/duration':
         specifier: ^1.2.0
         version: 1.2.0

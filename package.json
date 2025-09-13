@@ -1,7 +1,7 @@
 {
 	"name": "cobalt-gpt",
 	"version": "0.1.0",
-	"main": "./dist/bot.js",
+	"main": "dist/bot.js",
 	"type": "module",
 	"imports": {
 		"#lib/*": "./dist/lib/*.js",
@@ -30,6 +30,7 @@
 	"license": "MIT",
 	"private": true,
 	"dependencies": {
+		"@sapphire/discord.js-utilities": "^7.3.3",
 		"@sapphire/duration": "^1.2.0",
 		"@sapphire/framework": "^5.3.6",
 		"@sapphire/ratelimits": "^2.4.11",

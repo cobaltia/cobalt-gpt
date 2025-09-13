@@ -31,7 +31,7 @@ export class AskCommand extends Command {
 		);
 	}
 
-	public async run(interaction: Command.ChatInputCommandInteraction) {
+	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		await interaction.deferReply();
 		const prompt = interaction.options.getString('prompt', true);
 		const image = interaction.options.getAttachment('image');

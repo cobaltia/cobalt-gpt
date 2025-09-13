@@ -25,7 +25,7 @@ export class GenerateCommand extends Command {
 		);
 	}
 
-	public async run(interaction: Command.ChatInputCommandInteraction) {
+	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		await interaction.deferReply();
 		const prompt = interaction.options.getString('prompt', true);
 		const analyzes = await moderation(prompt);
