@@ -23,7 +23,7 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
       - name: Build Code
-        run: pnpm run build:ci
+        run: pnpm run build
   Format:
     name: Format
     runs-on: blacksmith-4vcpu-ubuntu-2404
