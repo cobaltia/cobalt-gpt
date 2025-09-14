@@ -36,6 +36,10 @@ export function parseGptToken() {
 	return envParseString('GPT_TOKEN');
 }
 
+export function parseGrokToken() {
+	return envParseString('GROK_TOKEN');
+}
+
 export function parseServers() {
 	return envParseArray('DISCORD_SERVERS');
 }
@@ -46,6 +50,8 @@ export const CLIENT_OPTIONS: ClientOptions = {
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 	partials: [Partials.Message, Partials.Channel],
 	loadDefaultErrorListeners: false,
+	loadMessageCommandListeners: true,
+	defaultPrefix: null,
 	allowedMentions: { repliedUser: false },
 	defaultCooldown: {
 		delay: 5 * Time.Second,
@@ -63,6 +69,7 @@ declare module '@skyra/env-utilities' {
 		CLIENT_SECRET?: string;
 		PROMPT_WEBHOOK_URL?: string;
 		GPT_TOKEN?: string;
+		GROK_TOKEN?: string;
 		DISCORD_SERVERS?: ArrayString;
 		WEBHOOK_ERROR_ID?: string;
 		WEBHOOK_ERROR_TOKEN?: string;
