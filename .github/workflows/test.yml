@@ -6,48 +6,57 @@ on:
   pull_request:
 
 jobs:
-  typescript:
-    name: Typescript
+  Building:
+    name: Building
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Install Node v16
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - name: Install Node v20
         uses: actions/setup-node@v3
         with:
-          node-version: 16
-          cache: yarn
-      - name: Install dependencies
-        run: yarn --immutable
-      - name: Run TypeScript compiler
-        run: yarn test:typescript
-  prettier:
-    name: Prettier
+          node-version: 20
+          cache: pnpm
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Code
+        run: pnpm run build
+  Format:
+    name: Format
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Install Node v16
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - name: Install Node v20
         uses: actions/setup-node@v3
         with:
-          node-version: 16
-          cache: yarn
-      - name: Install dependencies
-        run: yarn --immutable
+          node-version: 20
+          cache: pnpm
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
       - name: Run Prettier
-        run: yarn test:prettier
+        run: pnpm run test:prettier
   Linting:
-    name: Eslint
+    name: Linting
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
-      - name: checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
-      - name: Install Node v16
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - name: Install Node v20
         uses: actions/setup-node@v3
         with:
-          node-version: 16
-          cache: yarn
-      - name: Install dependencies
-        run: yarn --immutable
+          node-version: 20
+          cache: pnpm
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
       - name: Run Eslint
-        run: yarn lint --fix=false
+        run: pnpm run lint --fix=false

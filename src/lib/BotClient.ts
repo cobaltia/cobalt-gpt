@@ -1,14 +1,8 @@
-import { Client } from 'discord.js';
-import { CommandRegistry, ListenerRegistry } from '#lib/structures';
 import { CLIENT_OPTIONS } from '#root/config';
+import { SapphireClient } from '@sapphire/framework';
 
-export class BotClient extends Client {
+export class BotClient extends SapphireClient {
 	public constructor() {
 		super(CLIENT_OPTIONS);
-	}
-
-	public override async login(token?: string) {
-		await Promise.all([ListenerRegistry(this), CommandRegistry(this)]);
-		return super.login(token);
 	}
 }

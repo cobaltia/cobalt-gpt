@@ -6,3 +6,4 @@ yarn.lock
 Dockerfile
 .yarn/
 .yarnrc.yml
+pnpm-lock.yaml

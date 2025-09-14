@@ -1,16 +1,6 @@
-import { URL } from 'node:url';
-import { isClass } from '@sapphire/utilities';
-import type { Listener } from '#lib/structures';
+import type { Message } from 'discord.js';
 
-export type Structures = Listener;
-
-export async function resolveFile<T>(file: string) {
-	const rootFolder = new URL('../../../', import.meta.url);
-	const resolvedPath = new URL(file, rootFolder);
-	const File = await (await import(resolvedPath.toString())).default;
-	if (!isClass(File)) return null;
-	return new File() as T;
-}
+export const IMAGE_EXTENSION = /\.(bmp|jpe?g|png|gif|webp)$/i;
 
 /**
  * Truncate a string to a certain length
@@ -21,4 +11,66 @@ export async function resolveFile<T>(file: string) {
  */
 export function truncate(str: string, max: number) {
 	return str.length > max ? `${str.slice(0, max - 3)}...` : str;
+}
+
+export function getContent(message: Message) {
+	if (message.content) return message.content;
+	for (const embed of message.embeds) {
+		if (embed.description) return embed.description;
+		if (embed.fields.length) return embed.fields[0].value;
+	}
+
+	return null;
+}
+
+export interface ImageAttachment {
+	url: string;
+	proxyURL: string;
+	height: number;
+	width: number;
+}
+
+export function getAttachment(message: Message): ImageAttachment | null {
+	if (message.attachments.size) {
+		const attachment = message.attachments.find(att => IMAGE_EXTENSION.test(att.name ?? att.url));
+		if (attachment) {
+			return {
+				url: attachment.url,
+				proxyURL: attachment.proxyURL,
+				height: attachment.height!,
+				width: attachment.width!,
+			};
+		}
+	}
+
+	for (const embed of message.embeds) {
+		if (embed.image) {
+			return {
+				url: embed.image.url,
+				proxyURL: embed.image.proxyURL!,
+				height: embed.image.height!,
+				width: embed.image.width!,
+			};
+		}
+
+		if (embed.thumbnail) {
+			return {
+				url: embed.thumbnail.url,
+				proxyURL: embed.thumbnail.proxyURL!,
+				height: embed.thumbnail.height!,
+				width: embed.thumbnail.width!,
+			};
+		}
+	}
+
+	return null;
+}
+
+export function getImage(message: Message) {
+	const attachment = getAttachment(message);
+	if (attachment) return attachment.proxyURL || attachment.url;
+
+	const sticker = message.stickers.first();
+	if (sticker) return sticker.url;
+	return null;
 }

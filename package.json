@@ -1,7 +1,7 @@
 {
 	"name": "cobalt-gpt",
 	"version": "0.1.0",
-	"main": "./dist/bot.js",
+	"main": "dist/bot.js",
 	"type": "module",
 	"imports": {
 		"#lib/*": "./dist/lib/*.js",
@@ -21,7 +21,7 @@
 		"start": "NODE_ENV=production node --enable-source-maps dist/bot.js",
 		"start:dev": "node --enable-source-maps dist/bot.js",
 		"deploy:commands": "node --enable-source-maps dist/deploy.js",
-		"dev": "yarn build && yarn start:dev",
+		"dev": "pnpm run build && pnpm run start:dev",
 		"prettier": "prettier --write .",
 		"lint": "eslint --fix --ext ts src"
 	},
@@ -30,26 +30,26 @@
 	"license": "MIT",
 	"private": true,
 	"dependencies": {
-		"@sapphire/duration": "^1.1.0",
-		"@sapphire/ratelimits": "^2.4.6",
-		"@sapphire/timestamp": "^1.0.1",
-		"@sapphire/utilities": "^3.12.0",
-		"@skyra/env-utilities": "^1.2.1",
-		"discord-api-types": "^0.37.46",
-		"discord.js": "^14.11.0",
-		"globby": "^13.2.0",
-		"openai": "^4.46.0"
+		"@sapphire/discord.js-utilities": "^7.3.3",
+		"@sapphire/duration": "^1.2.0",
+		"@sapphire/framework": "^5.3.6",
+		"@sapphire/ratelimits": "^2.4.11",
+		"@sapphire/timestamp": "^1.0.5",
+		"@sapphire/utilities": "^3.18.2",
+		"@skyra/env-utilities": "^2.0.1",
+		"discord-api-types": "^0.38.24",
+		"discord.js": "^14.22.1",
+		"globby": "^14.1.0",
+		"openai": "^5.20.2"
 	},
 	"devDependencies": {
-		"@types/node": "^20.3.2",
-		"eslint": "^8.43.0",
-		"eslint-config-neon": "^0.1.47",
-		"prettier": "^2.8.8",
-		"tslib": "^2.6.0",
-		"typescript": "^5.1.6"
-	},
-	"resolutions": {
-		"@discordjs/util": "0.1.1-dev.1675598630-405f940.0"
-	},
-	"packageManager": "yarn@3.4.1"
+		"@types/lodash.merge": "^4.6.9",
+		"@types/node": "^24.4.0",
+		"eslint": "^9.35.0",
+		"eslint-config-neon": "^0.2.7",
+		"lodash.merge": "^4.6.2",
+		"prettier": "^3.6.2",
+		"tslib": "^2.8.1",
+		"typescript": "^5.9.2"
+	}
 }
