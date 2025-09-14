@@ -53,7 +53,6 @@ export async function sendGrokMessage(prompt: OpenAI.Chat.Completions.ChatComple
 			...prompt,
 		],
 	});
-	console.log('sendGrokMessage completion:', completion);
 	if (!completion.choices[0].message) throw new Error('No response from Grok');
 	return completion.choices[0].message;
 }
