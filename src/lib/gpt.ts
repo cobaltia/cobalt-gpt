@@ -96,7 +96,7 @@ async function streamTTS(prompt: string, model = 'gpt-4o-mini-tts') {
 		const openai = getOpenAiClient(model);
 		const response = await openai.audio.speech.create({
 			model,
-			voice: 'alloy',
+			voice: 'cedar',
 			input: prompt,
 			response_format: 'opus',
 		});
