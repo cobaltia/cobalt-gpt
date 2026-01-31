@@ -7,6 +7,7 @@ export class SpeakCommand extends Command {
 		super(context, {
 			...options,
 			description: 'Make the bot speak in a voice channel.',
+			preconditions: ['CobaltOnly'],
 		});
 	}
 

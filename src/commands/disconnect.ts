@@ -7,6 +7,7 @@ export class DisconnectCommand extends Command {
 		super(context, {
 			...options,
 			description: 'Disconnect the bot from the voice channel.',
+			preconditions: ['CobaltOnly'],
 		});
 	}
 
