@@ -30,6 +30,7 @@
 	"license": "MIT",
 	"private": true,
 	"dependencies": {
+		"@discordjs/voice": "^0.19.0",
 		"@sapphire/discord.js-utilities": "^7.3.3",
 		"@sapphire/duration": "^1.2.0",
 		"@sapphire/framework": "^5.3.6",
@@ -37,6 +38,7 @@
 		"@sapphire/timestamp": "^1.0.5",
 		"@sapphire/utilities": "^3.18.2",
 		"@skyra/env-utilities": "^2.0.1",
+		"@snazzah/davey": "^0.1.9",
 		"discord-api-types": "^0.38.24",
 		"discord.js": "^14.22.1",
 		"globby": "^14.1.0",
