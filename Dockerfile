@@ -23,8 +23,6 @@ FROM builder as runner
 ENV NODE_ENV="production"
 ENV NODE_OPTIONS="--enable-source-maps"
 
-COPY .env ./.env
-
 USER node
 
 CMD ["pnpm", "run", "start"]
