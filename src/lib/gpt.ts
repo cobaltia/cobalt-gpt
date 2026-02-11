@@ -1,119 +1,101 @@
+import { createOpenAI } from '@ai-sdk/openai';
+import { createXai } from '@ai-sdk/xai';
+import {
+	generateImage as aiGenerateImage,
+	experimental_generateSpeech as generateSpeech,
+	generateText,
+	type ModelMessage,
+	type UserContent,
+} from 'ai';
 import OpenAI from 'openai';
-import type { ChatCompletionContentPart } from 'openai/resources';
 import { parseGptToken, parseGrokToken } from '#root/config';
 import { Readable } from 'node:stream';
 
-function getOpenAiClient(model: string) {
-	if (model.startsWith('grok')) {
-		return new OpenAI({
-			apiKey: parseGrokToken(),
-			baseURL: 'https://api.x.ai/v1',
-			timeout: 360000,
-		});
-	}
-	return new OpenAI({
-		apiKey: parseGptToken(),
-	});
+const openai = createOpenAI({ apiKey: parseGptToken() });
+const xai = createXai({ apiKey: parseGrokToken() });
+
+export type ModerationResult = OpenAI.Moderations.Moderation;
+
+function formatResponseWithSources(text: string, sources: Awaited<ReturnType<typeof generateText>>['sources']): string {
+	const result = text.trim();
+	if (!sources.length) return result;
+	const urlSources = sources.filter(s => s.sourceType === 'url');
+	if (!urlSources.length) return result;
+	const sourceList = urlSources.map((s, i) => `[${i + 1}] ${s.url}`).join('\n');
+	return `${result}\n\nSources:\n${sourceList}`;
 }
 
 export async function sendMessage(prompt: string, userId: string, image: string | null, model = 'gpt-5.2') {
-	try {
-		const openai = getOpenAiClient(model);
-		const content: ChatCompletionContentPart[] = [{ type: 'text', text: prompt }];
-		if (image) content.push({ type: 'image_url', image_url: { url: image } });
+	const userContent: UserContent = [{ type: 'text', text: prompt }];
+	if (image) userContent.push({ type: 'file', data: new URL(image), mediaType: 'image/*' });
 
-		const completion = await openai.chat.completions.create({
-			model,
-			reasoning_effort: 'medium',
-			max_completion_tokens: 4_096,
-			messages: [
-				{
-					role: 'system',
-					content: 'You are a helpful assistant, but you must reject offensive slur responses.',
-				},
-				{
-					role: 'user',
-					content,
-				},
-			],
-			safety_identifier: `discord:${userId}`,
-		});
-		if (!completion.choices[0].message) throw new Error('No response from ChatGPT');
-		return completion.choices[0].message;
-	} catch (error) {
-		const err = error as Error;
-		throw new Error(err.message);
-	}
+	const { text, sources } = await generateText({
+		model: openai.responses(model),
+		system: 'You are a helpful assistant, but you must reject offensive slur responses.',
+		messages: [{ role: 'user', content: userContent }],
+		tools: {
+			web_search: openai.tools.webSearch(),
+		},
+		providerOptions: {
+			openai: {
+				reasoningEffort: 'medium',
+				maxCompletionTokens: 4_096,
+				safetyIdentifier: `discord:${userId}`,
+			},
+		},
+	});
+
+	if (!text) throw new Error('No response from ChatGPT');
+	return formatResponseWithSources(text, sources);
 }
 
-export async function sendGrokMessage(
-	prompt: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-	model = 'grok-4-1-fast-reasoning',
-) {
-	const openai = getOpenAiClient(model);
-	const completion = await openai.chat.completions.create({
-		model,
-		messages: [
-			{ role: 'system', content: 'You are a helpful assistant, but you must reject offensive slur responses.' },
-			...prompt,
-		],
+export async function sendGrokMessage(prompt: ModelMessage[], model = 'grok-4-1-fast-reasoning') {
+	const { text, sources } = await generateText({
+		model: xai.responses(model),
+		system: 'You are a helpful assistant, but you must reject offensive slur responses.',
+		messages: prompt,
+		tools: {
+			web_search: xai.tools.webSearch(),
+			x_search: xai.tools.xSearch(),
+		},
 	});
-	if (!completion.choices[0].message) throw new Error('No response from Grok');
-	return completion.choices[0].message;
+
+	if (!text) throw new Error('No response from Grok');
+	return formatResponseWithSources(text, sources);
 }
 
 export async function moderation(prompt: string) {
-	try {
-		const openai = getOpenAiClient('gpt-4o');
-		const response = await openai.moderations.create({
-			model: 'omni-moderation-latest',
-			input: prompt,
-		});
-		return response.results[0];
-	} catch (error) {
-		const err = error as Error;
-		throw new Error(err.message);
-	}
+	const client = new OpenAI({ apiKey: parseGptToken() });
+	const response = await client.moderations.create({
+		model: 'omni-moderation-latest',
+		input: prompt,
+	});
+	return response.results[0];
 }
 
-export async function generateImage(prompt: string, userId: string, model = 'dall-e-3') {
-	try {
-		const openai = getOpenAiClient(model);
-		const image = await openai.images.generate({
-			model: 'dall-e-3',
-			prompt,
-			user: `discord:${userId}`,
-		});
-		return image.data;
-	} catch (error) {
-		const err = error as Error;
-		throw new Error(err.message);
-	}
-}
+export async function generateImage(prompt: string, userId: string) {
+	const { image } = await aiGenerateImage({
+		model: openai.image('gpt-image-1.5'),
+		prompt,
+		providerOptions: {
+			openai: {
+				user: `discord:${userId}`,
+			},
+		},
+	});
 
-async function streamTTS(prompt: string, model = 'gpt-4o-mini-tts') {
-	try {
-		const openai = getOpenAiClient(model);
-		const response = await openai.audio.speech.create({
-			model,
-			voice: 'cedar',
-			input: prompt,
-			response_format: 'opus',
-		});
-		return response;
-	} catch (error) {
-		const err = error as Error;
-		throw new Error(err.message);
-	}
+	return image;
 }
 
 export async function streamTSSReadable(message: string, user: string, model = 'gpt-4o-mini-tts') {
 	const prompt = `User ${user} says: ${message}`;
-	const response = await streamTTS(prompt, model);
-	if (!response) throw new Error('No response from TTS');
+	const { audio } = await generateSpeech({
+		model: openai.speech(model),
+		text: prompt,
+		voice: 'cedar',
+		outputFormat: 'opus',
+	});
 
-	const body = (response as { body?: ReadableStream }).body;
-	if (!body) throw new Error('No response body from TTS');
-
-	return Readable.fromWeb(body);
+	if (!audio) throw new Error('No response from TTS');
+	return Readable.from(Buffer.from(audio.uint8Array));
 }
