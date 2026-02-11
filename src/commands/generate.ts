@@ -1,6 +1,5 @@
-import { WebhookClient, EmbedBuilder } from 'discord.js';
-import type Moderation from 'openai';
-import { generateImage, moderation } from '#lib/gpt';
+import { WebhookClient, EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import { generateImage, moderation, type ModerationResult } from '#lib/gpt';
 import { parseWebhooks } from '#root/config';
 import { Command } from '@sapphire/framework';
 
@@ -37,16 +36,13 @@ export class GenerateCommand extends Command {
 			return;
 		}
 
-		const res = await generateImage(prompt, interaction.user.id);
-		if (!res || !Array.isArray(res) || !res[0]?.url) throw new Error('No response from DALL·E');
-		await interaction.editReply(res[0].url);
+		const image = await generateImage(prompt, interaction.user.id);
+		if (!image) throw new Error('No response from DALL·E');
+		const attachment = new AttachmentBuilder(Buffer.from(image.uint8Array)).setName('image.png');
+		await interaction.editReply({ files: [attachment] });
 	}
 
-	private async logPrompt(
-		prompt: string,
-		analyze: Moderation.Moderations.Moderation,
-		interaction: Command.ChatInputCommandInteraction,
-	) {
+	private async logPrompt(prompt: string, analyze: ModerationResult, interaction: Command.ChatInputCommandInteraction) {
 		const webhook = new WebhookClient({ url: webhooks.prompt });
 		const embed = new EmbedBuilder()
 			.setTitle('Prompt')
@@ -62,7 +58,7 @@ export class GenerateCommand extends Command {
 		await webhook.send({ embeds: [embed] });
 	}
 
-	private formatAttributes(analyze: Moderation.Moderations.Moderation) {
+	private formatAttributes(analyze: ModerationResult) {
 		return Object.entries(analyze.category_scores)
 			.map(
 				([key, _]) =>

@@ -1,9 +1,8 @@
 import { sendGrokMessage } from '#lib/gpt';
 import { getImage, truncate } from '#utils/utils';
 import { Events, Listener, type UnknownMessageCommandPayload } from '@sapphire/framework';
+import type { ModelMessage, UserContent } from 'ai';
 import { AttachmentBuilder, MessageReferenceType, type Message } from 'discord.js';
-import type OpenAI from 'openai';
-import type { ChatCompletionContentPart } from 'openai/resources';
 
 export class ChatInputCommandDeniedListener extends Listener<typeof Events.UnknownMessageCommand> {
 	public constructor(context: Listener.LoaderContext, options: Listener.Options) {
@@ -20,9 +19,9 @@ export class ChatInputCommandDeniedListener extends Listener<typeof Events.Unkno
 
 		const cleanMessageContent = this.cleanMention(message.content);
 		const image = getImage(message);
-		const content: ChatCompletionContentPart[] = [{ type: 'text', text: cleanMessageContent }];
-		if (image) content.push({ type: 'image_url', image_url: { url: image } });
-		const repliedMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [{ role: 'user', content }];
+		const content: UserContent = [{ type: 'text', text: cleanMessageContent }];
+		if (image) content.push({ type: 'file', data: new URL(image), mediaType: 'image/*' });
+		const repliedMessages: ModelMessage[] = [{ role: 'user', content }];
 
 		let currentMessage: Message | null = message;
 
@@ -32,19 +31,15 @@ export class ChatInputCommandDeniedListener extends Listener<typeof Events.Unkno
 				const cleanMessageContent = this.cleanMention(referencedMessage.content);
 				const image = getImage(referencedMessage);
 
-				const content: ChatCompletionContentPart[] = [{ type: 'text', text: cleanMessageContent }];
-				if (image) content.push({ type: 'image_url', image_url: { url: image } });
-
 				if (referencedMessage.author.bot) {
 					repliedMessages.push({
 						role: 'assistant',
-						content,
-					} as OpenAI.Chat.Completions.ChatCompletionAssistantMessageParam);
+						content: cleanMessageContent,
+					});
 				} else {
-					repliedMessages.push({
-						role: 'user',
-						content,
-					} as OpenAI.Chat.Completions.ChatCompletionUserMessageParam);
+					const content: UserContent = [{ type: 'text', text: cleanMessageContent }];
+					if (image) content.push({ type: 'file', data: new URL(image), mediaType: 'image/*' });
+					repliedMessages.push({ role: 'user', content });
 				}
 				currentMessage = referencedMessage;
 			} catch {
@@ -57,15 +52,15 @@ export class ChatInputCommandDeniedListener extends Listener<typeof Events.Unkno
 
 		const response = await sendGrokMessage(finalMessage);
 
-		if (!response.content) await replyMsg.edit('No response from Grok');
-		if ((response.content?.length ?? 0) >= 2_000) {
-			const attachment = new AttachmentBuilder(Buffer.from(response.content!.trim())).setName('response.txt');
+		if (!response) await replyMsg.edit('No response from Grok');
+		if ((response?.length ?? 0) >= 2_000) {
+			const attachment = new AttachmentBuilder(Buffer.from(response.trim())).setName('response.txt');
 			await replyMsg.edit({
 				content: 'Your response was too long to be sent in a message. Here is a file instead.',
 				files: [attachment],
 			});
 		} else {
-			await replyMsg.edit(truncate(response.content!.trim(), 2_000));
+			await replyMsg.edit(truncate(response.trim(), 2_000));
 		}
 
 		this.container.logger.info(

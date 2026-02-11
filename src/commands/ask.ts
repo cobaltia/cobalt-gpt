@@ -1,7 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { WebhookClient, EmbedBuilder, AttachmentBuilder } from 'discord.js';
-import type Moderation from 'openai';
-import { moderation, sendMessage } from '#lib/gpt';
+import { moderation, sendMessage, type ModerationResult } from '#lib/gpt';
 import { parseWebhooks } from '#root/config';
 import { truncate } from '#utils/utils';
 import { BucketScope, Command } from '@sapphire/framework';
@@ -50,23 +49,19 @@ export class AskCommand extends Command {
 		}
 
 		const res = await sendMessage(prompt, interaction.member!.user.id, image?.url ?? null);
-		if (!res.content) throw new Error('No response from ChatGPT');
-		if (res.content.length > 2_000) {
-			const attachment = new AttachmentBuilder(Buffer.from(res.content.trim())).setName('response.txt');
+		if (!res) throw new Error('No response from ChatGPT');
+		if (res.length > 2_000) {
+			const attachment = new AttachmentBuilder(Buffer.from(res.trim())).setName('response.txt');
 			await interaction.editReply({
 				content: 'Your response was too long to be sent in a message. Here is a file instead.',
 				files: [attachment],
 			});
 		} else {
-			await interaction.editReply(truncate(res.content.trim(), 2_000));
+			await interaction.editReply(truncate(res.trim(), 2_000));
 		}
 	}
 
-	private async logPrompt(
-		prompt: string,
-		analyze: Moderation.Moderations.Moderation,
-		interaction: Command.ChatInputCommandInteraction,
-	) {
+	private async logPrompt(prompt: string, analyze: ModerationResult, interaction: Command.ChatInputCommandInteraction) {
 		const webhook = new WebhookClient({ url: webhooks.prompt });
 		const embed = new EmbedBuilder()
 			.setTitle('Prompt')
@@ -82,7 +77,7 @@ export class AskCommand extends Command {
 		await webhook.send({ embeds: [embed] });
 	}
 
-	private formatAttributes(analyze: Moderation.Moderations.Moderation) {
+	private formatAttributes(analyze: ModerationResult) {
 		return Object.entries(analyze.category_scores)
 			.map(
 				([key, _]) =>
