@@ -14,6 +14,15 @@ import { Readable } from 'node:stream';
 const openai = createOpenAI({ apiKey: parseGptToken() });
 const xai = createXai({ apiKey: parseGrokToken() });
 
+const SYSTEM_PROMPT = [
+	'You are a helpful assistant in a Discord server.',
+	'Keep responses concise and under 1800 characters when possible.',
+	'Use short paragraphs and bullet points for readability.',
+	'When citing web sources, reference them inline with [n] markers — do not repeat full URLs in your response body.',
+	'Limit sources to the most relevant (max 5).',
+	'Reject offensive slurs and hateful content.',
+].join(' ');
+
 export type ModerationResult = OpenAI.Moderations.Moderation;
 
 function formatResponseWithSources(text: string, sources: Awaited<ReturnType<typeof generateText>>['sources']): string {
@@ -31,7 +40,7 @@ export async function sendMessage(prompt: string, userId: string, image: string 
 
 	const { text, sources } = await generateText({
 		model: openai.responses(model),
-		system: 'You are a helpful assistant, but you must reject offensive slur responses.',
+		system: SYSTEM_PROMPT,
 		messages: [{ role: 'user', content: userContent }],
 		tools: {
 			web_search: openai.tools.webSearch(),
@@ -52,7 +61,7 @@ export async function sendMessage(prompt: string, userId: string, image: string 
 export async function sendGrokMessage(prompt: ModelMessage[], model = 'grok-4-1-fast-reasoning') {
 	const { text, sources } = await generateText({
 		model: xai.responses(model),
-		system: 'You are a helpful assistant, but you must reject offensive slur responses.',
+		system: SYSTEM_PROMPT,
 		messages: prompt,
 		tools: {
 			web_search: xai.tools.webSearch(),
