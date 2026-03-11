@@ -16,25 +16,31 @@ const xai = createXai({ apiKey: parseGrokToken() });
 
 const SYSTEM_PROMPT = [
 	'You are a helpful assistant in a Discord server.',
-	'Keep responses concise and under 1800 characters when possible.',
-	'Use short paragraphs and bullet points for readability.',
-	'When citing web sources, reference them inline with [n] markers — do not repeat full URLs in your response body.',
-	'Limit sources to the most relevant (max 5).',
-	'Reject offensive slurs and hateful content.',
+	'Default to concise answers: 1-4 short paragraphs or 3-6 bullet points.',
+	'Target under 1200 characters; never exceed 1800 unless the user explicitly asks for depth.',
+	'Use plain language, short sentences, and practical next steps.',
+	'If the request is ambiguous, ask one clarifying question before giving a long answer.',
+	'If you are uncertain, say so briefly and provide the best supported answer.',
+	'Use web search only when freshness or factual verification is needed; otherwise answer directly.',
+	'When citing web sources, use inline [n] markers only for claims that need evidence.',
+	'Keep citations minimal and relevant (max 5).',
+	'Do not include full URLs in the body; they are appended separately.',
+	'Refuse or safely redirect harmful content, including hate/harassment, sexual content involving minors, self-harm encouragement, and illegal violent wrongdoing.',
+	'Be polite, non-judgmental, and avoid inflammatory language.',
 ].join(' ');
 
 export type ModerationResult = OpenAI.Moderations.Moderation;
 
-function formatResponseWithSources(text: string, sources: Awaited<ReturnType<typeof generateText>>['sources']): string {
-	const result = text.trim();
-	if (!sources.length) return result;
-	const urlSources = sources.filter(s => s.sourceType === 'url');
-	if (!urlSources.length) return result;
-	const sourceList = urlSources.map((s, i) => `[${i + 1}] ${s.url}`).join('\n');
-	return `${result}\n\nSources:\n${sourceList}`;
+function formatResponseWithSources(
+	text: string,
+	_sources: Awaited<ReturnType<typeof generateText>>['sources'],
+): string {
+	let result = text.trim();
+	result = result = result.replace(/(?<!<)(https?:\/\/[^\s)>\]]+)(?!>)/gi, '<$1>');
+	return result;
 }
 
-export async function sendMessage(prompt: string, userId: string, image: string | null, model = 'gpt-5.2') {
+export async function sendMessage(prompt: string, userId: string, image: string | null, model = 'gpt-5.4') {
 	const userContent: UserContent = [{ type: 'text', text: prompt }];
 	if (image) userContent.push({ type: 'file', data: new URL(image), mediaType: 'image/*' });
 
@@ -100,6 +106,8 @@ export async function streamTSSReadable(message: string, user: string, model = '
 	const prompt = `User ${user} says: ${message}`;
 	const { audio } = await generateSpeech({
 		model: openai.speech(model),
+		instructions:
+			'Speak naturally, warm and conversational. Use subtle pauses and expressive intonation to make the speech engaging. Avoid sounding robotic.',
 		text: prompt,
 		voice: 'cedar',
 		outputFormat: 'opus',
