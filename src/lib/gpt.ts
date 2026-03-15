@@ -102,12 +102,16 @@ export async function generateImage(prompt: string, userId: string) {
 	return image;
 }
 
-export async function streamTSSReadable(message: string, user: string, model = 'gpt-4o-mini-tts') {
+export async function streamTSSReadable(
+	message: string,
+	user: string,
+	model = 'gpt-4o-mini-tts',
+	instructions: string = 'Speak naturally, warm and conversational. Use subtle pauses and expressive intonation to make the speech engaging. Avoid sounding robotic.',
+) {
 	const prompt = `User ${user} says: ${message}`;
 	const { audio } = await generateSpeech({
 		model: openai.speech(model),
-		instructions:
-			'Speak naturally, warm and conversational. Use subtle pauses and expressive intonation to make the speech engaging. Avoid sounding robotic.',
+		instructions,
 		text: prompt,
 		voice: 'cedar',
 		outputFormat: 'opus',

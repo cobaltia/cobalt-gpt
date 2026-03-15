@@ -26,8 +26,8 @@ export async function connectToChannel(channel: VoiceBasedChannel) {
 	}
 }
 
-export async function playAudio(player: AudioPlayer, prompt: string, speaker: string) {
-	const opusStream = await streamTSSReadable(prompt, speaker);
+export async function playAudio(player: AudioPlayer, prompt: string, speaker: string, instructions?: string) {
+	const opusStream = await streamTSSReadable(prompt, speaker, instructions);
 
 	const resource = createAudioResource(opusStream, {
 		inputType: StreamType.OggOpus,
