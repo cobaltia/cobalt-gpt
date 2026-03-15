@@ -83,7 +83,7 @@ export class SpeakCommand extends Command {
 		try {
 			const connection = await connectToChannel(voiceChannel);
 			connection.subscribe(this.container.player);
-			await playAudio(this.container.player, text, member.displayName ?? member.user.username, instructions);
+			await playAudio(this.container.player, text, member.displayName ?? member.user.username, { instructions });
 			const content = [`The bot is speaking in ${voiceChannel.name}.`, `Text: ${text}`].join('\n');
 			await interaction.editReply({ content });
 		} catch (error) {

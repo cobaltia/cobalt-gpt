@@ -1,4 +1,4 @@
-import { streamTSSReadable } from '#lib/gpt';
+import { streamTSSReadable, type TtsOptions } from '#lib/gpt';
 import {
 	AudioPlayerStatus,
 	StreamType,
@@ -26,8 +26,8 @@ export async function connectToChannel(channel: VoiceBasedChannel) {
 	}
 }
 
-export async function playAudio(player: AudioPlayer, prompt: string, speaker: string, instructions?: string) {
-	const opusStream = await streamTSSReadable(prompt, speaker, instructions);
+export async function playAudio(player: AudioPlayer, prompt: string, speaker: string, options?: TtsOptions) {
+	const opusStream = await streamTSSReadable(prompt, speaker, options);
 
 	const resource = createAudioResource(opusStream, {
 		inputType: StreamType.OggOpus,
