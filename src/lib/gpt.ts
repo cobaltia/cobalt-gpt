@@ -64,7 +64,7 @@ export async function sendMessage(prompt: string, userId: string, image: string 
 	return formatResponseWithSources(text, sources);
 }
 
-export async function sendGrokMessage(prompt: ModelMessage[], model = 'grok-4-1-fast-reasoning') {
+export async function sendGrokMessage(prompt: ModelMessage[], model = 'grok-4.5-latest') {
 	const { text, sources } = await generateText({
 		model: xai.responses(model),
 		system: SYSTEM_PROMPT,
